@@ -1,0 +1,66 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+#grid {
+  margin: 2rem;
+  height: 100px;
+  width: 50px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.cell {
+  color: white;
+  font-size: 3rem;
+  text-align: center;
+  padding: 30px;
+  border: 1px solid black;
+  margin-left: -1px;
+  margin-bottom: -1px;
+}
+
+button {
+  float: right;
+  margin-top: -130px;
+  height: 30px;
+  width: 70px;
+}
+
+.start_button {
+  margin-right: 1100px;
+}
+
+.restart_button {
+  margin-right: 1020px;
+}
+
+.occupedCell {
+  background-size: 50px 50px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.soldier1Cell {
+  background-image: url('icons/soldier1.png');
+}
+
+.soldier2Cell {
+  background-image: url('icons/soldier2.png');
+}
+
+.shot {
+  background-image: url('icons/bullet_hole.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 50px 50px;;
+}
+
+.shot.soldier1Cell {
+  background-color: crimson;
+}
+
+.shot.soldier2Cell {
+  background-color: crimson;
+}
