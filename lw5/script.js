@@ -110,40 +110,76 @@ function pullOutArray(myArray) {
 // pullOutArray([1, [1], null, NaN, ['test']]); // return [1, 1]
 //#endregion
 
-//#region isTimeRangesIntersect
-var timeR1 = {
-  t1: Date,
-  t2: Date
+class Interval {
+  constructor(start, end) {
+    this.start = start;
+    this.end = end;
+  }
 }
 
-var timeR2 = {
-  t1: Date,
-  t2: Date
-}
+//Шаблон ввода промежутка времени: hh:mm-hh:mm
+function IsTimeRangesIntersect(timeRange1, timeRange2) {
+  var timeR1 = timeRange1.split('-');
+  var timeR1Left = timeR1[0].split(':');
+  var timeR1Right = timeR1[1].split(':');
 
-function isTimeRangesIntersect(timeRange1, timeRange2) {
-  timeR1.t1 = new Date("1970-01-01T" + timeRange1[0]);
-  timeR1.t2 = new Date("1970-01-01T" + timeRange1[1]);
+  var timeR2 = timeRange2.split('-');
+  var timeR2Left = timeR2[0].split(':');
+  var timeR2Right = timeR2[1].split(':');
 
-  timeR2.t1 = new Date("1970-01-01T" + timeRange2[0]);
-  timeR2.t2 = new Date("1970-01-01T" + timeRange2[1]);
-
-  if (timeR1.t1 == "Invalid Date" ||
-    timeR1.t2 == "Invalid Date" ||
-    timeR2.t1 == "Invalid Date" ||
-    timeR2.t2 == "Invalid Date") {
-    console.error("Invalid date");
+  if (timeR1.length !== 2) {
+    console.log("Шаблон ввода: hh:mm-hh:mm");
+    console.error("Неверный ввод");
+    return;
+  }
+  if (timeR1Left.length  !== 2  ||
+      timeR1Right.length !== 2  ||
+      timeR2Left.length  !== 2  ||
+      timeR2Right.length !== 2) {
+    console.log("Шаблон ввода: hh:mm-hh:mm");
+    console.error("Неверный ввод");
     return;
   }
 
-  if ((timeR1.t2 > timeR2.t1 && timeR1.t2 < timeR2.t2) ||
-    (timeR1.t1 > timeR2.t1 && timeR1.t1 < timeR2.t2) ||
-    (timeR1.t1 < timeR2.t1 && timeR1.t2 > timeR2.t2) ||
-    (timeR1.t1 > timeR2.t1 && timeR1.t2 < timeR2.t2)) {
-    return true;
+  if ((parseInt(timeR1Right[0]) < parseInt(timeR1Left[0])) &&
+      (parseInt(timeR2Right[0]) < parseInt(timeR2Left[0]))) {
+    var firstBeforeMidnight       = new Interval(parseInt(timeR1Left[0] * 60) + parseInt(timeR1Left[1]), 23 * 60 + 59);
+    var firstPastMidnight         = new Interval(0, parseInt(timeR1Right[0] * 60) + parseInt(timeR1Right[1]));
+    var secondBeforeMidnight      = new Interval(parseInt(timeR2Left[0] * 60) + parseInt(timeR2Left[1]), 23 * 60 + 59);
+    var secondPastMidnight        = new Interval(0, parseInt(timeR2Right[0] * 60) + parseInt(timeR2Right[1]));
+
+    return (IsOverlap(firstBeforeMidnight.start, firstBeforeMidnight.end, secondBeforeMidnight.start, secondBeforeMidnight.end)
+         || IsOverlap(firstBeforeMidnight.start, firstBeforeMidnight.end, secondPastMidnight.start, secondPastMidnight.end)
+         || IsOverlap(firstPastMidnight.start, firstPastMidnight.end, secondBeforeMidnight.start, secondBeforeMidnight.end)
+         || IsOverlap(firstPastMidnight.start, firstPastMidnight.end, secondPastMidnight.start, secondPastMidnight.end));
+  }
+  else if (parseInt(timeR1Right[0]) < parseInt(timeR1Left[0])) {
+    var beforeMidnight       = new Interval(parseInt(timeR1Left[0] * 60) + parseInt(timeR1Left[1]), 23 * 60 + 59);
+    var pastMidnight         = new Interval(0, parseInt(timeR1Right[0] * 60) + parseInt(timeR1Right[1]));
+    var secondTimeInterval   = new Interval(parseInt(timeR2Left[0] * 60) + parseInt(timeR2Left[1]), parseInt(timeR2Right[0] * 60) + parseInt(timeR2Right[1]));
+
+    return (IsOverlap(beforeMidnight.start, beforeMidnight.end, secondTimeInterval.start, secondTimeInterval.end)
+         || IsOverlap(pastMidnight.start, pastMidnight.end, secondTimeInterval.start, secondTimeInterval.end));
+  }
+  else if (parseInt(timeR2Right[0]) < parseInt(timeR2Left[0])) {
+    var beforeMidnight      = new Interval(parseInt(timeR2Left[0] * 60) + parseInt(timeR2Left[1]), 23 * 60 + 59);
+    var pastMidnight        = new Interval(0, parseInt(timeR2Right[0] * 60) + parseInt(timeR2Right[1]));
+    var firstTimeInterval   = new Interval(parseInt(timeR1Left[0] * 60) + parseInt(timeR1Left[1]), parseInt(timeR1Right[0] * 60) + parseInt(timeR2Right[1]));
+
+    return (IsOverlap(beforeMidnight.start, beforeMidnight.end, firstTimeInterval.start, firstTimeInterval.end) 
+         || IsOverlap(pastMidnight.start, pastMidnight.end, firstTimeInterval.start, firstTimeInterval.end));
   }
   else {
+    return IsOverlap(timeR1Left, timeR1Right, timeR2Left, timeR2Right);
+  }
+}
+
+function IsOverlap(leftStart, leftEnd, rightStart, rightEnd) {
+  if (leftStart > rightEnd || rightStart > leftEnd) {
     return false;
+  }
+  else {
+    return true;
   }
 }
 //#endregion
@@ -180,7 +216,7 @@ function check(data, expectedType) {
 
 //#region replaceString
 function replaceString(sourceString, oldString, newString) {
-  if (!typeof sourceString == "string" || !typeof oldString == "string" || !typeof newString == "string") {
+  if (typeof sourceString !== 'string' || typeof oldString !== 'string'  || typeof newString !== 'string' ) {
     console.log("Неверные параметры");
     return false;
   }
@@ -196,4 +232,3 @@ function replaceString(sourceString, oldString, newString) {
   }
 }
 //#endregion
-
